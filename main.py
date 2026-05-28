@@ -2,6 +2,7 @@ import time
 from pathlib import Path
 import shutil
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
 SOURCE_DIR = Path(r"")
@@ -18,13 +19,29 @@ LOG_FILE =  Path(r"")
 
 CHECK_INTERVAL_SECONDS = 60
 
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    encoding="utf-8"
+# logging.basicConfig(
+#     filename=LOG_FILE,
+#     level=logging.INFO,
+#     format="[%(asctime)s] %(levelname)s: %(message)s",
+#     datefmt="%Y-%m-%d %H:%M:%S",
+#     encoding="utf-8"
+# )
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+handler = RotatingFileHandler(
+	LOG_FILE,
+	maxBytes=1 * 1024 * 1024,	# 1MB
+	backupCount=3,				# 古いログを３つまで残す
+	encoding="utf-8"
 )
+formatter = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+handler.setFormatter(formatter)
+
+if logger.hasHandlers():
+	logger.handlers.clear()
+logger.addHandler(handler)
 
 def smart_sync_files():
 	if not SOURCE_DIR.exists():
